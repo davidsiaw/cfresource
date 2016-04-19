@@ -7,7 +7,7 @@ get '*' do
 		thing = {
 			env: JSON.parse(JSON.pretty_generate(request.env)),
 			params: params,
-			body: request.body
+			body: request.body.read.to_s
 
 		} .to_yaml
 
@@ -20,7 +20,7 @@ post '*' do
 		thing = {
 			env: JSON.parse(JSON.pretty_generate(request.env)),
 			params: params,
-			body: request.body
+			body: request.body.read.to_s
 
 		} .to_yaml
 

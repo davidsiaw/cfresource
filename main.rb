@@ -1,29 +1,42 @@
 require 'sinatra'
 require 'yaml'
 require 'json'
+require 'net/http'
 
-get '*' do
-	open('get.log', 'a') do |f|
-		thing = {
-			env: JSON.parse(JSON.pretty_generate(request.env)),
-			params: params,
-			body: request.body.read.to_s
+post "*" do
+	if request["HTTP_X_AMZ_SNS_MESSAGE_TYPE"] == "SubscriptionConfirmation"
+		content = JSON.read(request.body.read)
 
-		} .to_yaml
+		uri = URI.new(content["SubscribeURL"])
 
-		f.puts thing
+		Net::HTTP.start(uri.host, uri.port,
+			:use_ssl => uri.scheme == 'https') do |http|
+			request = Net::HTTP::Get.new uri
+
+			response = http.request request
+		end
 	end
+
+	thing = {
+		type: "POST",
+		env: JSON.parse(JSON.pretty_generate(request.env)),
+		params: params,
+		body: request.body.read.to_s
+
+	} .to_yaml
+
+	puts thing
+
 end
 
-post '*' do
-	open('post.log', 'a') do |f|
-		thing = {
-			env: JSON.parse(JSON.pretty_generate(request.env)),
-			params: params,
-			body: request.body.read.to_s
+get '*' do
+	thing = {
+		type: "GET",
+		env: JSON.parse(JSON.pretty_generate(request.env)),
+		params: params,
+		body: request.body.read.to_s
 
-		} .to_yaml
+	} .to_yaml
 
-		f.puts thing
-	end
+	puts thing
 end

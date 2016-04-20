@@ -5,6 +5,8 @@ require 'net/http'
 
 post "*" do
 	if request["HTTP_X_AMZ_SNS_MESSAGE_TYPE"] == "SubscriptionConfirmation"
+
+		puts "Received subscription confirmation request"
 		content = JSON.read(request.body.read)
 
 		uri = URI.new(content["SubscribeURL"])
@@ -14,6 +16,8 @@ post "*" do
 			request = Net::HTTP::Get.new uri
 
 			response = http.request request
+
+			puts "Confirm status: #{response.code}"
 		end
 	end
 
